@@ -1,13 +1,7 @@
 <template>
   <div class="newsApp">
-    <h1 class="newsApp_header">NEWS</h1>
-    <div class='newsApp_date'>{{dayOfTheWeek}} {{day}}/{{month}}/{{year}} </div>
-    <input type="text" class="newsApp_search" placeholder="Search..."> 
-    <button class="newsApp_button" @click='fetchData'><i class="fas fa-search"></i><p>Search...</p></button>
+ 
   </div>
-  <article>
-
-  </article>
 </template>
 
 <script>
@@ -20,8 +14,7 @@ export default {
       date: new Date,
       weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       api_key: '9eb4691f409548d7b84d8d1b67ff7c65',
-      url_key: 'https://newsapi.org/v2/everything?',
-      articles: [],
+      url_key: 'https://newsapi.org/v2/everything?'
     }
   },
   computed:{
@@ -39,17 +32,6 @@ export default {
       return this.date.getFullYear() 
     }
   },
-  methods:{
-    async fetchData(){
-          try {
-            let {data} = await this.axios(`${this.api_url}weather?q=${this.query}&appid=${this.api_key}`);
-            this.weather = data
-          }
-          catch(e) {
-            console.log(e, 'Error')
-          }
-        }
-  }
 };
 
 </script>
@@ -62,14 +44,7 @@ export default {
   flex-direction: column;
   border: 1px solid black;
   padding: 30px; 
-  border-radius: 20px;
-  &_header{
-    text-align: center;
-  }
-  &_date{
-    text-align: center;
-    padding: 10px;
-  }
+
   &_search{
     padding: 10px;
     border-radius: 5px;
