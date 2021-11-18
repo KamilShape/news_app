@@ -1,70 +1,74 @@
 <template>
-  <div class="newsApp">
- 
-  </div>
+  <a :href='url' class="article" target="_blank">
+    <div class="article_image"  >
+      <img v-if='url' :src="image">
+      <i v-else class="fas fa-images article_icon"></i>
+      </div>
+    <div class="article_title_container">
+    <p class="article_title">{{title}}</p>
+    </div>
+  </a>
 </template>
 
 <script>
-
-
 export default {
-  name: "App",
-  data(){
+  data() {
     return{
-      date: new Date,
-      weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      api_key: '9eb4691f409548d7b84d8d1b67ff7c65',
-      url_key: 'https://newsapi.org/v2/everything?'
+      
     }
   },
-  computed:{
-    dayOfTheWeek(){
-      let day = this.date.getDay()
-      return this.weekdays[day]
-    },
-    day(){
-      return this.date.getDate()
-    },
-    month(){
-      return this.date.getMonth() + 1
-    },
-    year(){
-      return this.date.getFullYear() 
-    }
-  },
+  props:{
+    title: String,
+    image: String,
+    description: String,
+    url: String
+  }
 };
-
 </script>
 
 <style lang="scss">
-.newsApp{
-  width: 300px;
-  margin: 30px auto;
+.article{
+  position: relative;
+  margin:  10px auto;
+  width: 400px;
+  height: 150px;
   display: flex;
-  flex-direction: column;
+  padding: 30px;
   border: 1px solid black;
-  padding: 30px; 
+  border-radius: 30px;
 
-  &_search{
-    padding: 10px;
-    border-radius: 5px;
-    outline: none;
-    border: 1px solid black
-  }
-  &_button{
-    display: flex;
-    justify-content: space-evenly;
-    width: 100px;
-    margin: 10px auto;
-    padding: 10px;
-    border-radius: 10px 0;
-    border: none;
-    transition: 0.5s;
-
-    &:hover{
-      cursor: pointer;
-      border-radius: 0 10px;
+    &_image{
+      position: relative;
+      background-color: red;
     }
-  }
+    &_icon{
+      font-size: 40px;
+    }
+    &_title_container{
+      position: absolute;
+      top: 50%;
+      right: 0%;
+      transform: translateY(-50%);
+      width: 200px;
+      padding: 5px;
+      
+    }
+    &_title{
+      padding: 10px;
+      overflow: hidden;
+      color: black
+    }
+}
+img {
+    position: absolute;
+    max-width: 200px;
+    max-height: 150px;
+    height: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 20px;
+}
+img:hover{
+    cursor: pointer;
 }
 </style>
