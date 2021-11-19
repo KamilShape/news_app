@@ -4,6 +4,7 @@
     <div class='newsApp_date'>{{dayOfTheWeek}} {{day}}/{{month}}/{{year}} </div>
     <input type="text" class="newsApp_search" v-model='searchingWord' placeholder="Search..."> 
     <button class="newsApp_button" @click='fetchData'><i class="fas fa-search"></i><p>Search...</p></button>
+    <h3 class="newsApp_header">Results for: {{resultsFor}} ({{totalResults}})</h3>
   </div>
   <Article
     v-for='article in articles'
@@ -13,6 +14,8 @@
     :description='article.description'
     :url='article.url'
   />
+  <h3 class="newsApp_header">{{currentPage}} / {{pages}}</h3>
+  
 </template>
 
 <script>
@@ -22,12 +25,18 @@ export default {
   name: "App",
   data(){
     return{
+      api_key: '9eb4691f409548d7b84d8d1b67ff7c65',
+      url_key: 'https://newsapi.org/v2/everything?',
+      articles: [],
       date: new Date,
       weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       searchingWord: '',
-      api_key: '9eb4691f409548d7b84d8d1b67ff7c65',
-      url_key: 'https://newsapi.org/v2/everything?',
-      articles: []
+      resultsFor: '',
+      currentPage: 0,
+      maxPerPage: 30,
+      totalResults: 0
+
+     
     }
   },
   components:{
@@ -46,13 +55,19 @@ export default {
     },
     year(){
       return this.date.getFullYear() 
+    },
+    pages(){
+      return Math.ceil(this.totalResults/this.maxPerPage)
     }
   },
   methods:{
     async fetchData(){
-      this.articles = []
+      if(this.searchingWord !== ''){
+          this.resultsFor = this.searchingWord
+          this.articles = []
           try {
-            let {data} = await this.axios(`${this.url_key}q=${this.searchingWord}&from=${this.year-this.month-this.day}&sortBy=publishedAt&apiKey=${this.api_key}`);
+            let {data} = await this.axios(`${this.url_key}q=${this.searchingWord}&from=${this.year-this.month-this.day}&pageSize=${this.maxPerPage}&sortBy=publishedAt&apiKey=${this.api_key}`);
+              this.totalResults = data.totalResults
               data.articles.forEach(element => {
               this.articles.push(element);
             });
@@ -62,7 +77,8 @@ export default {
             console.log(e, 'Error')
           }
           this.searchingWord = ''
-        }
+      }
+    }
   }
 };
 

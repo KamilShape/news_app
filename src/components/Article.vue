@@ -36,6 +36,8 @@ export default {
   padding: 30px;
   border: 1px solid black;
   border-radius: 30px;
+   overflow: hidden;
+  
 
     &_image{
       position: relative;
@@ -52,11 +54,11 @@ export default {
       width: 200px;
       padding: 5px;
       
+      
     }
     &_title{
       padding: 10px;
-      overflow: hidden;
-      color: black
+      color: black;
     }
 }
 img {
