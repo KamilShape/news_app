@@ -1,21 +1,31 @@
 <template>
   <div class="newsApp">
-    <h1 class="newsApp_header">NEWS</h1>
-    <div class='newsApp_date'>{{dayOfTheWeek}} {{day}}/{{month}}/{{year}} </div>
-    <input type="text" class="newsApp_search" v-model='searchingWord' placeholder="Search..."> 
-    <button class="newsApp_button" @click='fetchData'><i class="fas fa-search"></i><p>Search...</p></button>
-    <h3 class="newsApp_header">Results for: {{resultsFor}} ({{totalResults}})</h3>
+    <div class="newsApp_wrapper">
+      <div class="newsApp_searchWindow">
+        <h1 class="newsApp_header">NEWS</h1>
+        <div class='newsApp_date'>{{dayOfTheWeek}} {{day}}/{{month}}/{{year}} </div>
+        <input type="text" class="newsApp_search" v-model='searchingWord' placeholder="Search..."> 
+        <button class="newsApp_button" @click='searchArticles'><i class="fas fa-search"></i><p>Search...</p></button>
+      </div>
+      <div class="newsApp_container">
+        <Article
+          v-for='article in articles'
+          :key='article.url'
+          :image='article.urlToImage'
+          :title='article.title'
+          :description='article.description'
+          :url='article.url'
+        />
+      </div>
+      <h3 class="newsApp_arrows" v-if='visible'>
+        <button class="newsApp_button" @click='changePageToFirst'><i class="fas fa-angle-double-left"></i></button>
+        <button class="newsApp_button" @click='changePageDown'><i class="fas fa-angle-left"></i></button>
+        <p class="newsApp_pageCounter">{{currentPage}} / {{pages}}</p>
+        <button class="newsApp_button" @click='changePageUp'><i class="fas fa-angle-right"></i></button>
+        <button class="newsApp_button" @click='changePageToLast'><i class="fas fa-angle-double-right"></i></button>
+      </h3>
+    </div>
   </div>
-  <Article
-    v-for='article in articles'
-    :key='article.url'
-    :image='article.urlToImage'
-    :title='article.title'
-    :description='article.description'
-    :url='article.url'
-  />
-  <h3 class="newsApp_header">{{currentPage}} / {{pages}}</h3>
-  
 </template>
 
 <script>
@@ -31,12 +41,10 @@ export default {
       date: new Date,
       weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       searchingWord: '',
-      resultsFor: '',
-      currentPage: 0,
-      maxPerPage: 30,
-      totalResults: 0
-
-     
+      currentPage: 1,
+      maxPerPage: 20,
+      totalResults: 0,
+      visible: false 
     }
   },
   components:{
@@ -57,42 +65,94 @@ export default {
       return this.date.getFullYear() 
     },
     pages(){
-      return Math.ceil(this.totalResults/this.maxPerPage)
+      let numberOfPages = Math.ceil(this.totalResults/this.maxPerPage)
+      if(numberOfPages <=5) {
+       return numberOfPages
+      } else {
+        return 5
+      }
     }
   },
   methods:{
-    async fetchData(){
-      if(this.searchingWord !== ''){
-          this.resultsFor = this.searchingWord
-          this.articles = []
+    async fetchData(actualPage){
           try {
-            let {data} = await this.axios(`${this.url_key}q=${this.searchingWord}&from=${this.year-this.month-this.day}&pageSize=${this.maxPerPage}&sortBy=publishedAt&apiKey=${this.api_key}`);
+            let {data} = await this.axios(`${this.url_key}q=${this.searchingWord}&from=${this.year}-${this.month}-${this.day}&pageSize=${this.maxPerPage}&page=${actualPage}&sortBy=publishedAt&apiKey=${this.api_key}`);
               this.totalResults = data.totalResults
               data.articles.forEach(element => {
               this.articles.push(element);
             });
-            console.log(this.articles)
           }
           catch(e) {
             console.log(e, 'Error')
           }
-          this.searchingWord = ''
-      }
-    }
+      },
+      searchArticles(){
+        if(this.searchingWord !== ''){
+          this.articles = []
+          this.currentPage = 1
+          this.fetchData(this.currentPage)
+          this.visible = true 
+        }
+       },
+
+      changePageUp(){
+        if(this.currentPage < this.pages){ 
+          this.currentPage++
+          console.log(this.currentPage)
+          this.articles = []
+          this.fetchData(this.currentPage)
+           
+        }
+      },
+       changePageDown(){
+         if(this.currentPage > 1) {
+            this.currentPage--
+            console.log(this.currentPage)
+            this.articles = []
+            this.fetchData(this.currentPage)
+             
+         }
+      },
+       changePageToFirst(){
+         if(this.currentPage > 1){
+            this.currentPage = 1
+            console.log(this.currentPage)
+            this.articles = []
+            this.fetchData(this.currentPage)
+         }
+       },
+       changePageToLast(){
+          if(this.currentPage < 5 ){
+            this.currentPage = 5
+            console.log(this.currentPage)
+            this.articles = []
+            this.fetchData(this.currentPage)
+             
+          }
+       },
+      
   }
 };
 
 </script>
 
 <style lang="scss">
+
 .newsApp{
-  width: 400px;
-  margin: 30px auto;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid black;
-  padding: 30px; 
-  border-radius: 20px;
+  &_wrapper{
+     width: 400px;
+     margin: 30px auto;
+  }
+  &_searchWindow{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin:  10px auto;
+    border: 1px solid black;
+    padding: 30px; 
+    box-sizing: border-box;
+    border-radius: 20px;
+  }
   &_header{
     text-align: center;
   }
@@ -109,7 +169,6 @@ export default {
   &_button{
     display: flex;
     justify-content: space-evenly;
-    width: 100px;
     margin: 10px auto;
     padding: 10px;
     border-radius: 10px 0;
@@ -121,9 +180,61 @@ export default {
       border-radius: 0 10px;
     }
   }
+  &_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    width: 100%;
+  }
   &_article{
     border: 1px solid black;
     padding: 20px;
+   
   }
-}
+  &_arrows{
+    display: flex;
+    width: 40%;
+    margin: 30px auto;
+  }
+  &_pageCounter{
+    line-height: 50px;
+  }
+  @media (min-width: 768px) {
+    .newsApp{
+      &_wrapper{
+        width: 600px;
+      }
+      &_container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        }
+      &_searchWindow{
+        width: 500px;
+        }
+      &_arrows{
+        width: 30%;
+        }
+      }
+    }
+  @media (min-width: 1024px) { 
+    .newsApp{
+      &_wrapper{
+        width: 950px;
+        }
+      &_arrows{
+        width: 20%;
+        }
+      }
+    }
+  @media (min-width: 1280px) {
+    .newsApp{
+      &_wrapper{
+        width: 1100px;
+        }
+      }
+    }
+  @media (min-width: 1440px) {
+ 
+    }
+  }
 </style>
